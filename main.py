@@ -56,6 +56,27 @@ class Player:
         self.hand.append(card)
         return
 
+    def hand_value(self):
+        total = 0
+
+        for i in self.hand:
+            # Remove suits and white space
+            card = i[:2].strip()
+            # Face cards are 10
+            if card == 'J' or card == 'Q' or card == 'K':
+                total += 10
+            # Aces are 1 or 11
+            elif card == 'A':
+                # TODO: probably needs to have more careful logic for Aces
+                if (total + 11) <= 21:
+                    total += 11
+                else:
+                    total += 1
+            # Int cards
+            else:
+                total += int(card)
+        return total
+
 
 class Blackjack:
 
@@ -63,6 +84,7 @@ class Blackjack:
         dealer = Player(True)
         self.players = [dealer]
         self.shoe = game_shoe
+        self.active_player = None
 
     def add_player(self, player):
         if len(self.players) < 6:
@@ -87,18 +109,5 @@ class Blackjack:
     def show_dealer_hand(self):
         print(self.players[0].hand)
 
-
-if __name__ == '__main__':
-    shoe = Shoe(5)
-    game = Blackjack(shoe)
-    player1 = Player()
-    player2 = Player()
-    player3 = Player()
-    player4 = Player()
-
-    game.add_player(player1)
-    game.add_player(player2)
-    game.add_player(player3)
-    game.add_player(player4)
-
-    game.deal_hands()
+    def get_dealer_value(self):
+        return self.players[0].hand_value()
