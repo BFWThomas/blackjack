@@ -1,4 +1,5 @@
-from random import randint
+from random import randint, choice
+from card_helper import deck
 
 class Shoe:
     """
@@ -8,7 +9,8 @@ class Shoe:
     """
 
     def __init__(self, size=1):
-        self.shoe = [size] * 52
+        self.shoe = dict(deck)
+        self.change_size(size)
         self.numCards = size * 52
 
     def change_size(self, num_decks):
@@ -16,76 +18,14 @@ class Shoe:
         Updates the shoe size to num_decks
         Returns the shoe array
         """
-
-        self.shoe = [num_decks] * 52
+        self.shoe = {x:num_decks for x in self.shoe}
         return self.shoe
 
-    def play_card(self, index):
-        if self.shoe[index] > 0:
-            self.shoe[index] -= 1
-            return True
+    def play_card(self, key):
+        if self.shoe[key] > 0:
+            self.shoe[key] -= 1
         else:
-            return False
-
-    def card_translation(self, index):
-        """
-        Given an index as int, return the name of the card that corresponds to the index
-        Should only be used for debugging
-        """
-
-        # Index is in Spade range (0-12)
-        if 0 <= index <= 12:
-            if 1 <= index <= 9:
-                print("Spade" + (str(index+1)))
-            elif index == 0:
-                print("SpadeA")
-            elif index == 10:
-                print("SpadeJ")
-            elif index == 11:
-                print("SpadeQ")
-            elif index == 12:
-                print("SpadeK")
-
-        # Index is in Clubs range (13-25)
-        elif 13 <= index <= 25:
-            if 14 <= index <= 22:
-                print("Club" + (str(index-12)))
-            elif index == 13:
-                print("ClubA")
-            elif index == 23:
-                print("ClubJ")
-            elif index == 24:
-                print("ClubQ")
-            elif index == 25:
-                print("ClubK")
-
-        # Index is in Hearts range (26-38)
-        elif 26 <= index <= 38:
-            if 27 <= index <= 35:
-                print("Heart" + (str(index-25)))
-            elif index == 26:
-                print("HeartA")
-            elif index == 36:
-                print("HeartJ")
-            elif index == 37:
-                print("HeartQ")
-            elif index == 38:
-                print("HeartK")
-
-        # Index is in Diamonds range (39-51)
-        elif 39 <= index <= 51:
-            if 40 <= index <= 48:
-                print("Diamond" + (str(index-38)))
-            elif index == 39:
-                print("DiamondA")
-            elif index == 49:
-                print("DiamondJ")
-            elif index == 50:
-                print("DiamondQ")
-            elif index == 51:
-                print("DiamondK")
-        else:
-            print("Invalid index")
+            self.shoe.pop(key, None)
         return
 
 
@@ -116,6 +56,27 @@ class Player:
         self.hand.append(card)
         return
 
+    def hand_value(self):
+        total = 0
+
+        for i in self.hand:
+            # Remove suits and white space
+            card = i[:2].strip()
+            # Face cards are 10
+            if card == 'J' or card == 'Q' or card == 'K':
+                total += 10
+            # Aces are 1 or 11
+            elif card == 'A':
+                # TODO: probably needs to have more careful logic for Aces
+                if (total + 11) <= 21:
+                    total += 11
+                else:
+                    total += 1
+            # Int cards
+            else:
+                total += int(card)
+        return total
+
 
 class Blackjack:
 
@@ -123,6 +84,7 @@ class Blackjack:
         dealer = Player(True)
         self.players = [dealer]
         self.shoe = game_shoe
+        self.active_player = None
 
     def add_player(self, player):
         if len(self.players) < 6:
@@ -131,38 +93,21 @@ class Blackjack:
         return False
 
     def deal_hands(self):
+        # Deal cards until players have 2 cards
         while len(self.players[0].hand) < 2:
             for i in self.players:
-                while True:
-                    attempt_card = randint(0, 51)
-                    if self.shoe.play_card(attempt_card):
-                        i.add_to_hand(attempt_card)
-                        break
-                    else:
-                        print("Card already played")
+                card_to_play = choice(list(self.shoe.shoe.items()))[0]
+                self.shoe.play_card(card_to_play)
+                i.add_to_hand(card_to_play)
         return
+
+    def hit(self, player):
+        card_to_play = choice(list(self.shoe.shoe.items()))[0]
+        self.shoe.play_card(card_to_play)
+        player.add_to_hand(card_to_play)
 
     def show_dealer_hand(self):
         print(self.players[0].hand)
 
-
-if __name__ == '__main__':
-    shoe = Shoe(5)
-    game = Blackjack(shoe)
-    player1 = Player()
-    player2 = Player()
-    player3 = Player()
-    player4 = Player()
-
-    game.add_player(player1)
-    game.add_player(player2)
-    game.add_player(player3)
-    game.add_player(player4)
-
-    game.deal_hands()
-    for i in game.players:
-        print(str(i))
-        for j in i.hand:
-            shoe.card_translation(j)
-
-    print(shoe.shoe)
+    def get_dealer_value(self):
+        return self.players[0].hand_value()
