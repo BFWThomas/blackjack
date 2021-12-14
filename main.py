@@ -1,4 +1,5 @@
-from random import randint
+from random import randint, choice
+from card_helper import deck
 
 class Shoe:
     """
@@ -8,7 +9,8 @@ class Shoe:
     """
 
     def __init__(self, size=1):
-        self.shoe = [size] * 52
+        self.shoe = dict(deck)
+        self.change_size(size)
         self.numCards = size * 52
 
     def change_size(self, num_decks):
@@ -16,16 +18,15 @@ class Shoe:
         Updates the shoe size to num_decks
         Returns the shoe array
         """
-
-        self.shoe = [num_decks] * 52
+        self.shoe = {x:num_decks for x in self.shoe}
         return self.shoe
 
-    def play_card(self, index):
-        if self.shoe[index] > 0:
-            self.shoe[index] -= 1
-            return True
+    def play_card(self, key):
+        if self.shoe[key] > 0:
+            self.shoe[key] -= 1
         else:
-            return False
+            self.shoe.pop(key, None)
+        return
 
     def card_translation(self, index):
         """
@@ -131,16 +132,18 @@ class Blackjack:
         return False
 
     def deal_hands(self):
+        # Deal cards until players have 2 cards
         while len(self.players[0].hand) < 2:
             for i in self.players:
-                while True:
-                    attempt_card = randint(0, 51)
-                    if self.shoe.play_card(attempt_card):
-                        i.add_to_hand(attempt_card)
-                        break
-                    else:
-                        print("Card already played")
+                card_to_play = choice(list(self.shoe.shoe.items()))[0]
+                self.shoe.play_card(card_to_play)
+                i.add_to_hand(card_to_play)
         return
+
+    def hit(self, player):
+        card_to_play = choice(list(self.shoe.shoe.items()))[0]
+        self.shoe.play_card(card_to_play)
+        player.add_to_hand(card_to_play)
 
     def show_dealer_hand(self):
         print(self.players[0].hand)
@@ -160,9 +163,3 @@ if __name__ == '__main__':
     game.add_player(player4)
 
     game.deal_hands()
-    for i in game.players:
-        print(str(i))
-        for j in i.hand:
-            shoe.card_translation(j)
-
-    print(shoe.shoe)
