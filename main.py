@@ -28,67 +28,6 @@ class Shoe:
             self.shoe.pop(key, None)
         return
 
-    def card_translation(self, index):
-        """
-        Given an index as int, return the name of the card that corresponds to the index
-        Should only be used for debugging
-        """
-
-        # Index is in Spade range (0-12)
-        if 0 <= index <= 12:
-            if 1 <= index <= 9:
-                print("Spade" + (str(index+1)))
-            elif index == 0:
-                print("SpadeA")
-            elif index == 10:
-                print("SpadeJ")
-            elif index == 11:
-                print("SpadeQ")
-            elif index == 12:
-                print("SpadeK")
-
-        # Index is in Clubs range (13-25)
-        elif 13 <= index <= 25:
-            if 14 <= index <= 22:
-                print("Club" + (str(index-12)))
-            elif index == 13:
-                print("ClubA")
-            elif index == 23:
-                print("ClubJ")
-            elif index == 24:
-                print("ClubQ")
-            elif index == 25:
-                print("ClubK")
-
-        # Index is in Hearts range (26-38)
-        elif 26 <= index <= 38:
-            if 27 <= index <= 35:
-                print("Heart" + (str(index-25)))
-            elif index == 26:
-                print("HeartA")
-            elif index == 36:
-                print("HeartJ")
-            elif index == 37:
-                print("HeartQ")
-            elif index == 38:
-                print("HeartK")
-
-        # Index is in Diamonds range (39-51)
-        elif 39 <= index <= 51:
-            if 40 <= index <= 48:
-                print("Diamond" + (str(index-38)))
-            elif index == 39:
-                print("DiamondA")
-            elif index == 49:
-                print("DiamondJ")
-            elif index == 50:
-                print("DiamondQ")
-            elif index == 51:
-                print("DiamondK")
-        else:
-            print("Invalid index")
-        return
-
 
 class Player:
     """
